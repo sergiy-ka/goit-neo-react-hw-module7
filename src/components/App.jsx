@@ -1,25 +1,34 @@
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchContacts } from "../redux/contactsOps";
+import {
+  selectFilteredContacts,
+  selectContactsLoading,
+  selectContactsError,
+} from "../redux/contactsSlice";
 import css from "./App.module.css";
-import { useSelector } from "react-redux";
-import { selectContacts } from "../redux/contactsSlice";
-import { selectNameFilter } from "../redux/filtersSlice";
 import ContactForm from "./ContactForm";
 import SearchBox from "./SearchBox";
 import ContactList from "./ContactList";
 
 const App = () => {
-  const contacts = useSelector(selectContacts);
-  const filter = useSelector(selectNameFilter);
+  const dispatch = useDispatch();
+  const contacts = useSelector(selectFilteredContacts);
+  const isLoading = useSelector(selectContactsLoading);
+  const error = useSelector(selectContactsError);
 
-  const visibleContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(filter.toLowerCase())
-  );
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <div className={css.container}>
       <h1 className={css.title}>Phonebook</h1>
       <ContactForm />
       <SearchBox />
-      <ContactList contacts={visibleContacts} />
+      {isLoading && <p>Loading contacts...</p>}
+      {error && <p>Error: {error}</p>}
+      <ContactList contacts={contacts} />
     </div>
   );
 };
